@@ -30,9 +30,26 @@ export default function Experience() {
         azimuth={-167.2}
       />
       <Center position-y={0.75}>
-        <mesh geometry={nodes.baked.geometry} rotation-x={Math.PI / 2}>
+        <mesh
+          geometry={nodes.baked.geometry}
+          position={nodes.baked.position}
+          rotation={nodes.baked.rotation}
+          scale={nodes.baked.scale}
+        >
           <meshBasicMaterial map={bakedTexture} />
         </mesh>
+        <mesh
+          geometry={nodes.base006.geometry}
+          position={nodes.base006.position}
+          rotation={nodes.base006.rotation}
+          scale={nodes.base006.scale}
+        />
+        <mesh
+          geometry={nodes.rope008.geometry}
+          position={nodes.rope008.position}
+          rotation={nodes.rope008.rotation}
+          scale={nodes.rope008.scale}
+        />
       </Center>
     </>
   );
