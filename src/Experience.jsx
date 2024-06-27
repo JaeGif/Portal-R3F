@@ -4,17 +4,35 @@ import {
   Sky,
   useGLTF,
   useTexture,
+  Sparkles,
+  shaderMaterial,
 } from '@react-three/drei';
 import { Perf } from 'r3f-perf';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
+// Shaders
+import portalVertexShader from './shaders/portal/vertex.glsl';
+import portalFragmentShader from './shaders/portal/fragment.glsl';
+import { extend, useFrame } from '@react-three/fiber';
+
+const PortalMaterial = shaderMaterial(
+  { uTime: 0 },
+  portalVertexShader,
+  portalFragmentShader
+);
+
+extend({ PortalMaterial });
 
 export default function Experience() {
   const { nodes } = useGLTF('./model/portal.glb');
   const bakedTexture = useTexture('./model/baked.jpg');
   bakedTexture.flipY = false;
 
-  useEffect(() => {}, []);
+  const portalLightRef = useRef(null);
 
+  useFrame((state, delta) => {
+    portalLightRef.current.uTime += delta;
+  });
   return (
     <>
       <Perf position='top-left' />
@@ -30,6 +48,7 @@ export default function Experience() {
         azimuth={-167.2}
       />
       <Center position-y={0.75}>
+        {/* Main Geometry */}
         <mesh
           geometry={nodes.baked.geometry}
           position={nodes.baked.position}
@@ -38,28 +57,45 @@ export default function Experience() {
         >
           <meshBasicMaterial map={bakedTexture} />
         </mesh>
+
+        {/* Lights */}
         <mesh
           geometry={nodes.base006.geometry}
           position={nodes.base006.position}
           rotation={nodes.base006.rotation}
           scale={nodes.base006.scale}
-        />
+        >
+          <meshBasicMaterial color={'#ffffe5'} />
+        </mesh>
         <mesh
           geometry={nodes.rope008.geometry}
           position={nodes.rope008.position}
           rotation={nodes.rope008.rotation}
           scale={nodes.rope008.scale}
+        >
+          <meshBasicMaterial color={'#ffffe5'} />
+        </mesh>
+
+        {/* Portal Light */}
+        <mesh
+          geometry={nodes.Circle.geometry}
+          position={nodes.Circle.position}
+          rotation={nodes.Circle.rotation}
+          scale={nodes.Circle.scale}
+        >
+          <portalMaterial ref={portalLightRef} transparent side={2} />
+        </mesh>
+
+        {/* Fireflies */}
+        <Sparkles
+          size={6}
+          scale={[4, 3, 4]}
+          position-y={1.6}
+          speed={0.4}
+          count={20}
+          color={'orange'}
         />
       </Center>
     </>
   );
 }
-
-/* ​
-0: Object { isObject3D: true, uuid: "d2ccf590-29ac-4fd6-8188-ff6f307b99a8", name: "Circle", … }
-​​
-1: Object { isObject3D: true, uuid: "fa8b6682-52db-4f97-9db4-f61030a04af4", name: "base006", … }
-​​
-2: Object { isObject3D: true, uuid: "bf078011-8b9f-4803-b5a4-d113e40cfb49", name: "rope008", … }
-​​
-3: Object { isObject3D: true, uuid: "80822ab8-c3e2-44fe-b806-02073e41c991", name: "baked", … } */
