@@ -1,15 +1,15 @@
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei';
+import { Perf } from 'r3f-perf';
+export default function Experience() {
+  return (
+    <>
+      <Perf position='top-left' />
+      <OrbitControls makeDefault />
 
-export default function Experience()
-{
-    return <>
-
-        <OrbitControls makeDefault />
-
-        <mesh scale={ 1.5 }>
-            <boxGeometry />
-            <meshNormalMaterial />
-        </mesh>
-
+      <mesh scale={1.5}>
+        <boxGeometry />
+        <meshNormalMaterial />
+      </mesh>
     </>
+  );
 }
