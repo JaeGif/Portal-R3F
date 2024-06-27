@@ -8,11 +8,15 @@ import {
   shaderMaterial,
 } from '@react-three/drei';
 import { Perf } from 'r3f-perf';
-import { useEffect, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 // Shaders
 import portalVertexShader from './shaders/portal/vertex.glsl';
 import portalFragmentShader from './shaders/portal/fragment.glsl';
+import firefliesVertexShader from './shaders/fireflies/vertex.glsl';
+import firefliesFragmentShader from './shaders/fireflies/fragment.glsl';
+
+// R3F
 import { extend, useFrame } from '@react-three/fiber';
 
 const PortalMaterial = shaderMaterial(
@@ -23,21 +27,50 @@ const PortalMaterial = shaderMaterial(
 
 extend({ PortalMaterial });
 
+const FirefliesMaterial = shaderMaterial(
+  {
+    uPixelRatio: Math.min(window.devicePixelRatio, 2),
+    uTime: 0,
+  },
+  firefliesVertexShader,
+  firefliesFragmentShader
+);
+
+extend({ FirefliesMaterial });
+
 export default function Experience() {
   const { nodes } = useGLTF('./model/portal.glb');
   const bakedTexture = useTexture('./model/baked.jpg');
   bakedTexture.flipY = false;
 
   const portalLightRef = useRef(null);
+  const firefliesRef = useRef(null);
+
+  const firefliesCount = 25;
+
+  const { firefliesPositions, firefliesScale } = useMemo(() => {
+    const firefliesPositions = new Float32Array(firefliesCount * 3);
+
+    const firefliesScale = new Float32Array(firefliesCount);
+
+    for (let i = 0; i < firefliesCount; i++) {
+      firefliesPositions[i * 3 + 0] = (Math.random() - 0.5) * 4;
+      firefliesPositions[i * 3 + 1] = Math.random() * 1.5;
+      firefliesPositions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+      firefliesScale[i] = Math.random();
+    }
+    return { firefliesPositions, firefliesScale };
+  }, [firefliesCount]);
 
   useFrame((state, delta) => {
     portalLightRef.current.uTime += delta;
+    firefliesRef.current.uTime += delta;
   });
   return (
     <>
-      <Perf position='top-left' />
+      {/*       <Perf position='top-left' />
+       */}{' '}
       <OrbitControls makeDefault maxPolarAngle={Math.PI / 2 - 0.1} />
-
       <Sky
         sunPosition={[0, -1, 0]}
         distance={450000}
@@ -87,14 +120,38 @@ export default function Experience() {
         </mesh>
 
         {/* Fireflies */}
-        <Sparkles
+        <points>
+          <bufferGeometry attach={'geometry'}>
+            <bufferAttribute
+              attach='attributes-position'
+              count={firefliesPositions.length / 3}
+              array={firefliesPositions}
+              itemSize={3}
+              usage={THREE.DynamicDrawUsage}
+            />
+            <bufferAttribute
+              attach='attributes-aScale'
+              count={firefliesScale.length}
+              array={firefliesScale}
+              itemSize={1}
+              usage={THREE.DynamicDrawUsage}
+            />
+          </bufferGeometry>
+          <firefliesMaterial
+            ref={firefliesRef}
+            transparent
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </points>
+        {/*         <Sparkles
           size={6}
           scale={[4, 3, 4]}
           position-y={1.6}
           speed={0.4}
           count={20}
           color={'orange'}
-        />
+        /> */}
       </Center>
     </>
   );

@@ -1,6 +1,5 @@
 uniform float uTime;
 uniform float uPixelRatio;
-uniform float uSize;
 
 attribute float aScale;
 
@@ -18,6 +17,6 @@ void main() {
 
     gl_Position = projectionPosition;
     gl_PointSize = 40.0 * uPixelRatio;              // fix size for all pixel ratios
-    gl_PointSize = uSize * flickerScale * uPixelRatio;    // change sizes
+    gl_PointSize = 100.0 * flickerScale * uPixelRatio;    // change sizes
     gl_PointSize *= (1.0 / - viewPosition.z);       // size attenuation
 }
